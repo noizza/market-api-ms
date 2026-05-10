@@ -1,0 +1,55 @@
+package com.apimicroservice.demo.service;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.apimicroservice.demo.dto.ProductDTO;
+import com.apimicroservice.demo.exception.ResourceNotFoundException;
+import com.apimicroservice.demo.repository.ProductMapper;
+import com.apimicroservice.demo.repository.ProductRepository;
+
+import lombok.RequiredArgsConstructor;
+
+@Service
+@Transactional
+@RequiredArgsConstructor
+public class ProductService {
+    private final ProductRepository repository;
+    private final ProductMapper mapper;
+
+    public ProductDTO createProductDTO(ProductDTO dto) {
+        var product = mapper.toEntity(dto);
+        var savedProduct = repository.save(product);
+        return mapper.toDTO(savedProduct);
+    }
+
+    @Transactional(readOnly = true)
+    public ProductDTO getProductDTOById(Long id) {
+        var product = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("El producto con ID " + id + " no existe."));
+        return mapper.toDTO(product);
+    }
+
+    public ProductDTO updateProductDTO(ProductDTO dto) {
+         var product = repository.findById(dto.id()).orElseThrow(() -> new ResourceNotFoundException("El producto con ID " + dto.id() + " no existe."));
+        mapper.updateProductFromDTO(dto, product);
+        var updatedProduct = repository.save(product);
+        return mapper.toDTO(updatedProduct);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProductDTO> getAllProducts() {
+        var products = repository.findAll();
+        return mapper.toDTOList(products);
+    }
+
+    public void deleteProductById(Long id) {
+        repository.deleteById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProductDTO> searchProductsByNameDTO(String name) {
+        return mapper.toDTOList(repository.findByNameContainingIgnoreCase(name));
+    }
+}
