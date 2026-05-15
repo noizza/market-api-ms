@@ -1,6 +1,7 @@
 package com.apimicroservice.demo.model;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -32,7 +33,7 @@ public class Venta {
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "venta_id")
-    private java.util.List<DetalleVenta> detalles;
+    private List<DetalleVenta> detalles;
 
     @PrePersist
     public void onCreate() {

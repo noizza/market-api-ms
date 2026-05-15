@@ -40,31 +40,25 @@ public class VentaService {
 
         List<DetalleVenta> detalles = new ArrayList<>();
 
-        for(ItemRequestDTO itemReq : request.getItems()) {
+        for(ItemRequestDTO itemReq : request.getDetalles()) {
             ProductoDTO prod = productoClient.getProductoById(itemReq.getProductoId());
 
-            // Validar stock (usando Double para quesos/embutidos)
-            if (prod.getStock() < itemReq.getCantidad()) {
-                throw new RuntimeException("Stock insuficiente para: " + prod.getName() + 
-                                         ". Disponible: " + prod.getStock());
+            if (prod.stock() < itemReq.getCantidad()) {
+                throw new RuntimeException("Stock insuficiente para: " + prod.name() + 
+                                         ". Disponible: " + prod.stock());
             }
 
-            // Crear el detalle de la venta
             DetalleVenta detalle = new DetalleVenta();
-            detalle.setProductoId(prod.getId());
+            detalle.setProductoId(prod.id());
             detalle.setCantidad(itemReq.getCantidad());
-            
-            // IMPORTANTE: Guardamos el precio del producto AL MOMENTO de la venta.
-            // Si el precio cambia mañana, tu registro de venta histórica no se altera.
-            detalle.setPrecioUnitario(prod.getPrice());
+
+            detalle.setPrecioUnitario(prod.precio());
             
             detalles.add(detalle);
         }
 
-        // 4. Vincular detalles y guardar
-        venta.setItems(detalles);
+        venta.setDetalles(detalles);
         
-        // Esto guarda en la tabla 'venta' y 'venta_detalle' de db_ventas en SQL Server
-        return ventaRepository.save(venta);
+        return repository.save(venta);
     }
 }
