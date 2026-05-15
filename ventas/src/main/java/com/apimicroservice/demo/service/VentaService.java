@@ -36,9 +36,9 @@ public class VentaService {
 
         var venta = new Venta();
         venta.setClienteId(request.getClienteId());
-        venta.setDate(LocalDateTime.now());
 
         List<DetalleVenta> detalles = new ArrayList<>();
+        Double total = 0.0;
 
         for(ItemRequestDTO itemReq : request.getDetalles()) {
             ProductoDTO prod = productoClient.getProductoById(itemReq.getProductoId());
@@ -53,11 +53,13 @@ public class VentaService {
             detalle.setCantidad(itemReq.getCantidad());
 
             detalle.setPrecioUnitario(prod.precio());
-            
+            detalle.setVenta(venta);
+            total += detalle.getPrecioUnitario() * detalle.getCantidad();
             detalles.add(detalle);
         }
 
         venta.setDetalles(detalles);
+        venta.setTotal_amount(total);
         
         return repository.save(venta);
     }

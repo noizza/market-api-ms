@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.apimicroservice.demo.dto.ProductoDTO;
 
-@FeignClient(name = "ms-productos", url = "localhost:8082/api/productos")
+@FeignClient(name = "ms-productos", url = "localhost:8082/productos")
 public interface ProductosClient {
     @GetMapping("/{id}")
     ProductoDTO getProductoById(@PathVariable Long id);

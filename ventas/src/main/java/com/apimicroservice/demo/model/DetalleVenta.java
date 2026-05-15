@@ -1,14 +1,13 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
 package com.apimicroservice.demo.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.Data;
 
 @Entity
@@ -21,4 +20,9 @@ public class DetalleVenta {
     private Long productoId;
     private Double cantidad;
     private Double precioUnitario;
+
+    @ManyToOne
+    @JoinColumn(name = "venta_id")
+    @JsonIgnore
+    private Venta venta;
 }
