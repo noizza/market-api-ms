@@ -52,4 +52,14 @@ public class ProductService {
     public List<ProductDTO> searchProductsByNameDTO(String name) {
         return mapper.toDTOList(repository.findByNameContainingIgnoreCase(name));
     }
+
+    @Transactional
+    public void reduceStock(Long productId, Double quantity) {
+        var product = repository.findById(productId).orElseThrow(() -> new ResourceNotFoundException("El producto con ID " + productId + " no existe."));
+        if (product.getStock() < quantity) {
+            throw new RuntimeException("Stock insuficiente para el producto: " + product.getName());
+        }
+        product.setStock(product.getStock() - quantity);
+        repository.save(product);
+    }
 }

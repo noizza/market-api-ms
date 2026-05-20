@@ -1,6 +1,5 @@
 package com.apimicroservice.demo.service;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,16 +40,16 @@ public class VentaService {
         Double total = 0.0;
 
         for(ItemRequestDTO itemReq : request.getDetalles()) {
-            ProductoDTO prod = productoClient.getProductoById(itemReq.getProductoId());
+            ProductoDTO prod = productoClient.getProductoById(itemReq.productoId());
 
-            if (prod.stock() < itemReq.getCantidad()) {
+            if (prod.stock() < itemReq.cantidad()) {
                 throw new RuntimeException("Stock insuficiente para: " + prod.name() + 
                                          ". Disponible: " + prod.stock());
             }
 
             DetalleVenta detalle = new DetalleVenta();
             detalle.setProductoId(prod.id());
-            detalle.setCantidad(itemReq.getCantidad());
+            detalle.setCantidad(itemReq.cantidad());
 
             detalle.setPrecioUnitario(prod.precio());
             detalle.setVenta(venta);
@@ -59,6 +58,9 @@ public class VentaService {
         }
 
         venta.setDetalles(detalles);
+        for(DetalleVenta d : detalles) {
+            productoClient.reduceStock(d.getProductoId(), d.getCantidad());
+        }
         venta.setTotal_amount(total);
         
         return repository.save(venta);

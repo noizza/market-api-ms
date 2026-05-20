@@ -57,4 +57,10 @@ public class ProductController {
     public List<ProductDTO> searchProducts(@RequestParam String name) {
         return service.searchProductsByNameDTO(name);
     }
+
+    @PostMapping("/{id}/reduce-stock")
+    public ResponseEntity<Void> reduceStock(@PathVariable Long id, @RequestParam Double quantity) {
+        service.reduceStock(id, quantity);
+        return ResponseEntity.ok().build();
+    }
 }

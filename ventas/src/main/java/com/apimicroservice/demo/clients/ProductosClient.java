@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import com.apimicroservice.demo.dto.ProductoDTO;
 
@@ -15,4 +16,7 @@ public interface ProductosClient {
 
     @GetMapping("/search/{name}")
     List<ProductoDTO> searchProductosByName(@PathVariable String name);
+
+    @PostMapping("/{id}/reduce-stock")
+    void reduceStock(@PathVariable Long id, Double quantity);
 }
