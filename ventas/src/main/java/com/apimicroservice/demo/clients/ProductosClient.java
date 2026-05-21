@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import com.apimicroservice.demo.dto.ProductoDTO;
 
-@FeignClient(name = "ms-productos", url = "localhost:8082/productos")
+@FeignClient(name = "ms-productos")
 public interface ProductosClient {
     @GetMapping("/{id}")
     ProductoDTO getProductoById(@PathVariable Long id);
