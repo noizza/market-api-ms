@@ -10,9 +10,11 @@ import com.apimicroservice.demo.clients.ProductosClient;
 import com.apimicroservice.demo.dto.ClienteDTO;
 import com.apimicroservice.demo.dto.ItemRequestDTO;
 import com.apimicroservice.demo.dto.ProductoDTO;
+import com.apimicroservice.demo.dto.VentaDTO;
 import com.apimicroservice.demo.dto.VentaRequestDTO;
 import com.apimicroservice.demo.model.DetalleVenta;
 import com.apimicroservice.demo.model.Venta;
+import com.apimicroservice.demo.repository.VentaMapper;
 import com.apimicroservice.demo.repository.VentaRepository;
 
 import jakarta.transaction.Transactional;
@@ -25,8 +27,9 @@ public class VentaService {
     private final VentaRepository repository;
     private final ClienteClient client;
     private final ProductosClient productoClient;
+    private final VentaMapper mapper;
 
-    public Venta createVenta(VentaRequestDTO request) {
+    public VentaDTO createVenta(VentaRequestDTO request) {
         // Validar cliente
         ClienteDTO cliente = client.getClienteById(request.getClienteId());
         if (cliente == null) {
@@ -62,7 +65,7 @@ public class VentaService {
             productoClient.reduceStock(d.getProductoId(), d.getCantidad());
         }
         venta.setTotal_amount(total);
-        
-        return repository.save(venta);
+        Venta savedVenta = repository.save(venta);
+        return mapper.toDTO(savedVenta);
     }
 }

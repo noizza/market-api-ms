@@ -1,35 +1,38 @@
 package com.apimicroservice.demo.service;
 
-import java.util.stream.Collectors;
+import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.apimicroservice.demo.dto.ClienteDTO;
 import com.apimicroservice.demo.model.Cliente;
+import com.apimicroservice.demo.repository.ClienteMapper;
 import com.apimicroservice.demo.repository.ClienteRepository;
 
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+
 @Service
+@Transactional
+@RequiredArgsConstructor
 public class ClienteService {
-    @Autowired
-    private ClienteRepository repository;
+    private final ClienteRepository repository;
+    private final ClienteMapper mapper;
 
     public ClienteDTO createClienteDTO(ClienteDTO dto) {
-        Cliente cliente = new Cliente();
-        cliente.setName(dto.name());
-        cliente.setEmail(dto.email());
+        Cliente cliente = mapper.toEntity(dto);
         Cliente savedCliente = repository.save(cliente);
-        return new ClienteDTO(savedCliente.getId(), savedCliente.getName(), savedCliente.getEmail());
+        return mapper.toDTO(savedCliente);
     }
 
     public ClienteDTO getClienteDTOById(Long id) {
-        Cliente c = repository.findById(id).orElseThrow(() -> new RuntimeException("Cliente not found"));
-        return new ClienteDTO(c.getId(), c.getName(), c.getEmail());
+        Cliente c = repository.findById(id).orElseThrow(()
+            -> new RuntimeException("Cliente not found"));
+        return mapper.toDTO(c);
     }
 
-    public Iterable<ClienteDTO> getAllClientes() {
-        return repository.findAll().stream()
-                .map(c -> new ClienteDTO(c.getId(), c.getName(), c.getEmail()))
-                .collect(Collectors.toList());
+    public List<ClienteDTO> getAllClientes() {
+        List<Cliente> all = repository.findAll();
+        return mapper.toDTOList(all);
     }
 }
