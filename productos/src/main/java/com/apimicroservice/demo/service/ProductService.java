@@ -1,5 +1,6 @@
 package com.apimicroservice.demo.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -61,5 +62,14 @@ public class ProductService {
         }
         product.setStock(product.getStock() - quantity);
         repository.save(product);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProductDTO> createProductsBatch(List<Long> ids) {
+        if(ids == null || ids.isEmpty()) {
+            throw new IllegalArgumentException("La lista de IDs no puede estar vacía.");
+        }
+        var products = repository.findAllById(ids);
+        return mapper.toDTOList(products);
     }
 }

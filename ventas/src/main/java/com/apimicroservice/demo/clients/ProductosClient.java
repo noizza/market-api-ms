@@ -19,4 +19,7 @@ public interface ProductosClient {
 
     @PostMapping("/{id}/reduce-stock")
     void reduceStock(@PathVariable Long id, Double quantity);
+
+    @PostMapping("/batch")
+    List<ProductoDTO> getProductosBatch(List<Long> ids);
 }

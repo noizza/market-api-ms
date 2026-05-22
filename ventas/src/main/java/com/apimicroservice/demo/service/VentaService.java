@@ -2,6 +2,8 @@ package com.apimicroservice.demo.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -35,25 +37,31 @@ public class VentaService {
         if (cliente == null) {
             throw new RuntimeException("Cliente con ID " + request.getClienteId() + " no encontrado.");
         }
+        List<Long> productoIds = request.getDetalles().stream()
+                .map(ItemRequestDTO::productoId)
+                .toList();
+        List<ProductoDTO> productosDisponibles = productoClient.getProductosBatch(productoIds);
+        Map<Long, ProductoDTO> productoMap = productosDisponibles.stream()
+                .collect(Collectors.toMap(ProductoDTO::id, p -> p));
 
         var venta = new Venta();
         venta.setClienteId(request.getClienteId());
-
         List<DetalleVenta> detalles = new ArrayList<>();
         Double total = 0.0;
 
         for(ItemRequestDTO itemReq : request.getDetalles()) {
-            ProductoDTO prod = productoClient.getProductoById(itemReq.productoId());
-
+            ProductoDTO prod = productoMap.get(itemReq.productoId());
+            if (prod == null) {
+                throw new RuntimeException("El producto con ID " + itemReq.productoId() + " no existe.");
+            }
             if (prod.stock() < itemReq.cantidad()) {
                 throw new RuntimeException("Stock insuficiente para: " + prod.name() + 
-                                         ". Disponible: " + prod.stock());
+                                        ". Disponible: " + prod.stock());
             }
 
             DetalleVenta detalle = new DetalleVenta();
             detalle.setProductoId(prod.id());
             detalle.setCantidad(itemReq.cantidad());
-
             detalle.setPrecioUnitario(prod.precio());
             detalle.setVenta(venta);
             total += detalle.getPrecioUnitario() * detalle.getCantidad();

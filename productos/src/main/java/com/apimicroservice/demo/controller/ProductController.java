@@ -63,4 +63,10 @@ public class ProductController {
         service.reduceStock(id, quantity);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/batch")
+    public ResponseEntity<List<ProductDTO>> createProductsBatch(@Valid @RequestBody List<Long> ids) {
+        List<ProductDTO> createdProducts = service.createProductsBatch(ids);
+        return ResponseEntity.ok(createdProducts);
+    }
 }
