@@ -22,4 +22,7 @@ public interface ProductosClient {
 
     @PostMapping("/batch")
     List<ProductoDTO> getProductosBatch(List<Long> ids);
+
+    @PostMapping("/batch/reduce-stock")
+    void reduceStockBatch(List<Long> productIds, List<Double> quantities);
 }

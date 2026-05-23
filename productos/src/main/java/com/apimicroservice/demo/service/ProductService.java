@@ -71,4 +71,14 @@ public class ProductService {
         var products = repository.findAllById(ids);
         return mapper.toDTOList(products);
     }
+
+    @Transactional
+    public void reduceStockBatch(List<Long> productIds, List<Double> quantities) {
+        if(productIds == null || quantities == null || productIds.size() != quantities.size()) {
+            throw new IllegalArgumentException("Las listas de IDs y cantidades deben ser no nulas y del mismo tamaño.");
+        }
+        for(int i = 0; i < productIds.size(); i++) {
+            reduceStock(productIds.get(i), quantities.get(i));
+        }
+    }
 }

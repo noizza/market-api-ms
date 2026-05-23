@@ -69,4 +69,10 @@ public class ProductController {
         List<ProductDTO> createdProducts = service.createProductsBatch(ids);
         return ResponseEntity.ok(createdProducts);
     }
+
+    @PostMapping("/batch/reduce-stock")
+    public ResponseEntity<Void> reduceStockBatch(@RequestBody List<Long> productIds, @RequestBody List<Double> quantities) {
+        service.reduceStockBatch(productIds, quantities);
+        return ResponseEntity.ok().build();
+    }
 }
