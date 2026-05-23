@@ -18,7 +18,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "dto.ventas")
+@Table(name = "ventas")
 @Data
 @NoArgsConstructor
 @DynamicUpdate

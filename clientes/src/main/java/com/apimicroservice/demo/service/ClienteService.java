@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.apimicroservice.demo.dto.ClienteDTO;
+import com.apimicroservice.demo.exception.ResourceNotFoundException;
 import com.apimicroservice.demo.model.Cliente;
 import com.apimicroservice.demo.repository.ClienteMapper;
 import com.apimicroservice.demo.repository.ClienteRepository;
@@ -27,7 +28,7 @@ public class ClienteService {
 
     public ClienteDTO getClienteDTOById(Long id) {
         Cliente c = repository.findById(id).orElseThrow(()
-            -> new RuntimeException("Cliente not found"));
+            -> new ResourceNotFoundException("El cliente con ID " + id + " no existe."));
         return mapper.toDTO(c);
     }
 
