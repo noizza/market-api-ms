@@ -1,6 +1,7 @@
 package com.apimicroservice.demo.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,12 +74,12 @@ public class ProductService {
     }
 
     @Transactional
-    public void reduceStockBatch(List<Long> productIds, List<Double> quantities) {
-        if(productIds == null || quantities == null || productIds.size() != quantities.size()) {
-            throw new IllegalArgumentException("Las listas de IDs y cantidades deben ser no nulas y del mismo tamaño.");
-        }
-        for(int i = 0; i < productIds.size(); i++) {
-            reduceStock(productIds.get(i), quantities.get(i));
+    public void reduceStockBatch(Map<Long, Double> entry) {
+        for (Map.Entry<Long, Double> e : entry.entrySet()) {
+            int updatedRows = repository.updateStock(e.getKey(), e.getValue());
+            if (updatedRows == 0) {
+                throw new RuntimeException("Stock insuficiente para el producto con ID: " + e.getKey());
+            }
         }
     }
 }

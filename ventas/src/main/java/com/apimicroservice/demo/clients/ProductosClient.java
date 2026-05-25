@@ -1,6 +1,7 @@
 package com.apimicroservice.demo.clients;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,5 +25,5 @@ public interface ProductosClient {
     List<ProductoDTO> getProductosBatch(List<Long> ids);
 
     @PostMapping("/batch/reduce-stock")
-    void reduceStockBatch(List<Long> productIds, List<Double> quantities);
+    void reduceStockBatch(Map<Long, Double> stockReductions);
 }

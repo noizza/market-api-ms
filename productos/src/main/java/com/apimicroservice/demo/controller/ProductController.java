@@ -1,6 +1,7 @@
 package com.apimicroservice.demo.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -71,8 +72,8 @@ public class ProductController {
     }
 
     @PostMapping("/batch/reduce-stock")
-    public ResponseEntity<Void> reduceStockBatch(@RequestBody List<Long> productIds, @RequestBody List<Double> quantities) {
-        service.reduceStockBatch(productIds, quantities);
+    public ResponseEntity<Void> reduceStockBatch(@RequestBody Map<Long, Double> stockReductions) {
+        service.reduceStockBatch(stockReductions);
         return ResponseEntity.ok().build();
     }
 }
