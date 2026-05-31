@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 
 
 @RestController
-@RequestMapping("/clientes")
+@RequestMapping("/api/clientes")
 @RequiredArgsConstructor
 public class ClienteController {
 
