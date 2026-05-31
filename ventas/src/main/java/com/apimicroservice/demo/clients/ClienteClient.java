@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.apimicroservice.demo.dto.ClienteDTO;
 
-@FeignClient(name = "ms-cliente")
+@FeignClient(name = "ms-clientes")
 public interface ClienteClient {
-    @GetMapping("/{id}")
+    @GetMapping("/api/clientes/{id}")
     ClienteDTO getClienteById(@PathVariable Long id);
 }
