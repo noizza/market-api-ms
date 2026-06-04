@@ -35,7 +35,7 @@ public class User {
     @Column(nullable = false)
     private Integer role;
     @Column(nullable = false)
-    private Integer status;
+    private Boolean status;
     private LocalDateTime createdAt;
     @Column(nullable = false)
     private String whatsapp;
