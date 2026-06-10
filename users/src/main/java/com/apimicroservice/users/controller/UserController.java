@@ -19,7 +19,7 @@ public class UserController {
     
     private final UserService service;
 
-    @PostMapping
+    @PostMapping("/register")
     public UserResponseDTO createUser(@RequestBody User user) {
         return service.createUser(user);
     }

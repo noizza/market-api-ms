@@ -4,6 +4,7 @@ import java.util.Date;
 
 import javax.crypto.SecretKey;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
@@ -11,7 +12,8 @@ import io.jsonwebtoken.security.Keys;
 
 @Component
 public class JwtUtil {
-    private final String KEY_MASTER = "asdasd";
+    @Value("${jwt.secret}")
+    private String KEY_MASTER;
 
     private SecretKey getKey() {
         byte[] keyBytes = KEY_MASTER.getBytes();

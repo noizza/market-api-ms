@@ -7,6 +7,7 @@ import java.util.Map;
 
 import javax.crypto.SecretKey;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +31,8 @@ public class UserService {
     private final UserMapper mapper;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    private final String KEY_ = "asdasd";
+    @Value("${jwt.secret}")
+    private String KEY_;
 
     private SecretKey getSingKey() {
         return Keys.hmacShaKeyFor(KEY_.getBytes(StandardCharsets.UTF_8));
@@ -38,7 +40,8 @@ public class UserService {
 
     public UserResponseDTO createUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return mapper.toDTO(user);
+        User savedUser = repository.save(user);
+        return mapper.toDTO(savedUser);
     }
 
     public String login(LoginRequestDTO req) {
