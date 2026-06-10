@@ -18,7 +18,7 @@ public class DetalleVenta {
     private Long id;
     
     private Long productoId;
-    private Double cantidad;
+    private double cantidad;
     private Double precioUnitario;
 
     @ManyToOne

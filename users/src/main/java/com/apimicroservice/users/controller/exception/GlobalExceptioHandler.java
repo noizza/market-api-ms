@@ -12,18 +12,18 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.apimicroservice.users.exception.BadCredentialsException;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+public class GlobalExceptioHandler {
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<Map<String, String>> handleBadCredentials(BadCredentialsException ex) {
         Map<String, String> error = new HashMap<>();
         error.put("timestamp: ", LocalDateTime.now().toString());
         error.put("error: ", "Error interno en el servidor.");
         error.put("message", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, String>> handleBadCredentials(Exception ex) {
+    public ResponseEntity<Map<String, String>> handleGeneral(Exception ex) {
         Map<String, String> error = new HashMap<>();
         error.put("timestamp: ", LocalDateTime.now().toString());
         error.put("error: ", "Error interno del servidor");
