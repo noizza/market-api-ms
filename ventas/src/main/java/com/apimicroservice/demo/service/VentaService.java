@@ -62,7 +62,7 @@ public class VentaService {
             DetalleVenta detalle = new DetalleVenta();
             detalle.setProductoId(prod.id());
             detalle.setCantidad(itemReq.cantidad());
-            detalle.setPrecioUnitario(prod.precio());
+            detalle.setPrecioUnitario(prod.price());
             detalle.setVenta(venta);
             total += detalle.getPrecioUnitario() * detalle.getCantidad();
             detalles.add(detalle);

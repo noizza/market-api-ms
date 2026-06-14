@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import com.apimicroservice.demo.dto.ProductoDTO;
 
-@FeignClient(name = "ms-productos", path = "/productos")
+@FeignClient(name = "ms-productos", path = "/api/productos")
 public interface ProductosClient {
     @GetMapping("/{id}")
     ProductoDTO getProductoById(@PathVariable Long id);
