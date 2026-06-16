@@ -22,9 +22,18 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String barcode;
     private String name;
     private String description;
+    private Double cost;
     private Double price;
-    private Double stock;
+    private Integer stock;
+    private Integer unitId;
     private Integer minStock;
+    private Integer maxStock;
+    private Integer loyaltyPoints;
+    private boolean TaxesIncluded;
+    private Double taxRate;
+    private Integer taxConditionId;
+    
 }
