@@ -71,7 +71,12 @@ public class VentaService {
         venta.setDetalles(detalles);
         
         Map<Long, Double> stockReductions = request.getDetalles().stream()
-                .collect(Collectors.toMap(ItemRequestDTO::productoId, ItemRequestDTO::cantidad, Double::sum));
+                .filter(item -> item != null)
+                .collect(Collectors.toMap(
+                    ItemRequestDTO::productoId,
+                    item -> (double) item.cantidad(),
+                    (existing, newValue) -> existing + newValue
+                ));
         productoClient.reduceStockBatch(stockReductions);
 
         venta.setTotal_amount(total);
