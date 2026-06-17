@@ -60,7 +60,7 @@ public class ProductService {
         if (product.getStock() < quantity) {
             throw new RuntimeException("Stock insuficiente para el producto: " + product.getName());
         }
-        product.setStock(product.getStock() - quantity);
+        product.setStock(product.getStock() - quantity.intValue());
         repository.save(product);
     }
 

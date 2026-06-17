@@ -46,14 +46,14 @@ public class Product {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
-    private Category categoryId;
+    private Category category;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "productId")
     private List<ProductSpecs> specs;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "supplier_id")
-    private Supplier supplierId;
+    private Supplier supplier;
 
 
     private boolean active;
@@ -61,5 +61,5 @@ public class Product {
     private LocalDateTime createdAt;
     private LocalDateTime inventoryUpdatedAt;
     private boolean promoted;
-    private Promotions promotionId;
+    private Promotions promotion;
 }
