@@ -10,7 +10,7 @@ import jakarta.validation.constraints.PositiveOrZero;
 public record ProductDTO(
     Long id,
 
-    String barcode,
+    Long barcode,
 
     @NotBlank(message = "El nombre no puede estar vacío")
     String name,
@@ -28,8 +28,6 @@ public record ProductDTO(
     @NotNull(message = "El stock es obligatorio")
     @Min(value = 0, message = "El stock no puede ser negativo")
     Integer stock,
-
-    Integer unitId,
 
     @Min(value = 0, message = "El stock mínimo no puede ser negativo")
     Integer minStock,

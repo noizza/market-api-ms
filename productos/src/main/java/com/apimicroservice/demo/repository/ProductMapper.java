@@ -9,6 +9,7 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
 import com.apimicroservice.demo.dto.ProductDTO;
+import com.apimicroservice.demo.dto.prProductDTO;
 import com.apimicroservice.demo.model.Product;
 
 @Mapper(componentModel = "spring")
@@ -16,6 +17,9 @@ public interface ProductMapper {
     ProductDTO toDTO(Product producto);
     Product toEntity(ProductDTO dto);
     List<ProductDTO> toDTOList(List<Product> productos);
+
+    prProductDTO toPrDTO(Product producto);
+    List<prProductDTO> toPrDTOList(List<Product> productos);
 
     @Mapping(target = "id", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

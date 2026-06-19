@@ -30,7 +30,7 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String barcode;
+    private Long barcode;
     private String name;
     private String description;
     private Double cost;

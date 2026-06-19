@@ -37,10 +37,10 @@ public class VentaService {
         if (cliente == null) {
             throw new RuntimeException("Cliente con ID " + request.getClienteId() + " no encontrado.");
         }
-        List<Long> productoIds = request.getDetalles().stream()
-                .map(ItemRequestDTO::productoId)
+        List<Long> productoBCs = request.getDetalles().stream()
+                .map(ItemRequestDTO::barcode)
                 .toList();
-        List<ProductoDTO> productosDisponibles = productoClient.getProductosBatch(productoIds);
+        List<ProductoDTO> productosDisponibles = productoClient.getProductosBatch(bacode);
         Map<Long, ProductoDTO> productoMap = productosDisponibles.stream()
                 .collect(Collectors.toMap(ProductoDTO::id, p -> p));
 
