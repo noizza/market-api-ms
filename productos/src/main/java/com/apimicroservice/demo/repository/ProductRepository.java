@@ -13,8 +13,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     public List<Product> findByNameContainingIgnoreCase(String name);
 
     @Modifying
-    @Query("UPDATE Product p SET p.stock = p.stock - :quantity WHERE p.id = :id AND p.stock >= :quantity")
-    public int updateStock(@Param("id") Long id, @Param("quantity") Double quantity);
+    @Query("UPDATE Product p SET p.stock = p.stock - :quantity WHERE p.bacode = :id AND p.stock >= :quantity")
+    public int reduceStockByBarcode(@Param("barcode") Long barcode, @Param("quantity") Integer quantity);
 
     boolean existsBy();
 }

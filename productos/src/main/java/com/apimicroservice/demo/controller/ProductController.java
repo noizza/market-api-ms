@@ -72,7 +72,7 @@ public class ProductController {
     }
 
     @PostMapping("/batch/reduce-stock")
-    public ResponseEntity<Void> reduceStockBatch(@RequestBody Map<Long, Double> stockReductions) {
+    public ResponseEntity<Void> reduceStockBatch(@RequestBody Map<Long, Integer> stockReductions) {
         service.reduceStockBatch(stockReductions);
         return ResponseEntity.ok().build();
     }

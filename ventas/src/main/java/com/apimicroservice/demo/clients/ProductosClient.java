@@ -26,5 +26,5 @@ public interface ProductosClient {
     List<ProductoDTO> getProductosBatch(@RequestBody List<Long> ids);
 
     @PostMapping("/batch/reduce-stock")
-    void reduceStockBatch(@RequestBody Map<Long, Double> stockReductions);
+    void reduceStockBatch(@RequestBody Map<Long, Integer> stockReductions);
 }

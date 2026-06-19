@@ -74,12 +74,12 @@ public class ProductService {
     }
 
     @Transactional
-    public void reduceStockBatch(Map<Long, Double> entry) {
-        for (Map.Entry<Long, Double> e : entry.entrySet()) {
-            int updatedRows = repository.updateStock(e.getKey(), e.getValue());
-            if (updatedRows == 0) {
-                throw new RuntimeException("Stock insuficiente para el producto con ID: " + e.getKey());
+    public void reduceStockBatch(Map<Long, Integer> entry) {
+        entry.forEach((barcode, quantity) -> {
+            int updateRows = repository.reduceStockByBarcode(barcode, quantity);
+            if(updateRows == 0) {
+                throw new RuntimeException("Stock insuficiente para el producto con ID: " + barcode);
             }
-        }
+        });
     }
 }

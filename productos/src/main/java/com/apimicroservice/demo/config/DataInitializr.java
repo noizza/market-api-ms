@@ -1,5 +1,6 @@
 package com.apimicroservice.demo.config;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.boot.CommandLineRunner;
@@ -19,14 +20,48 @@ public class DataInitializr implements CommandLineRunner {
     public void run(String... args) throws Exception {
         if(!repo.existsBy()) { 
             List<Product> productosKiosco = List.of(
-                new Product(null, "Galletitas Sonrisas Bagley 118g", "Galletitas dulces rellenas con sabor a frambuesa.", 1100.00, 30.0, 5),
-                new Product(null, "Palitos Salados Pehuamar 65g", "Snack clásico salado ideal para copetín.", 1350.00, 20.0, 4),
-                new Product(null, "Alfajor Guaymallén Chocolate", "Alfajor triple relleno con dulce de leche.", 450.00, 50.0, 10),
-                new Product(null, "Gaseosa Coca-Cola Original 500ml", "Bebida sin alcohol en botella de plástico (PET).", 1600.00, 24.0, 6)
+                Product.builder()
+                    .barcode(7791234567891L)
+                    .name("Galletitas Sonrisas Bagley 118g")
+                    .description("Galletitas dulces rellenas con sabor a frambuesa.")
+                    .cost(800.00)
+                    .price(1100.00)
+                    .stock(30)
+                    .minStock(5)
+                    .taxesIncluded(true)
+                    .active(true)
+                    .createdAt(LocalDateTime.now())
+                    .build(),
+
+                Product.builder()
+                    .barcode(7791234567892L)
+                    .name("Palitos Salados Pehuamar 65g")
+                    .description("Snack clásico salado ideal para copetín.")
+                    .cost(950.00)
+                    .price(1350.00)
+                    .stock(20)
+                    .minStock(4)
+                    .taxesIncluded(true)
+                    .active(true)
+                    .createdAt(LocalDateTime.now())
+                    .build(),
+
+                Product.builder()
+                    .barcode(7791234567893L)
+                    .name("Alfajor Guaymallén Chocolate")
+                    .description("Alfajor triple relleno con dulce de leche.")
+                    .cost(300.00)
+                    .price(450.00)
+                    .stock(50)
+                    .minStock(10)
+                    .taxesIncluded(true)
+                    .active(true)
+                    .createdAt(LocalDateTime.now())
+                    .build()
             );
 
             for (Product producto : productosKiosco) {
-                    repo.save(producto);
+                repo.save(producto);
             }
         }
     }
