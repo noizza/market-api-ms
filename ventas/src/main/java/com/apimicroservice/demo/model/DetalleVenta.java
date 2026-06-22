@@ -17,9 +17,10 @@ public class DetalleVenta {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    private Long productoId;
-    private double cantidad;
+    private Long barcode;
+    private Integer cantidad;
     private Double precioUnitario;
+    private Double subTotal;
 
     @ManyToOne
     @JoinColumn(name = "venta_id")

@@ -1,10 +1,10 @@
 package com.apimicroservice.demo.dto;
 
 public record ProductoDTO(
-    Long id,
+    Long barcode,
     String name,
     Double price,
-    Double stock
+    Integer stock
 ) {
 
 }

@@ -1,5 +1,6 @@
 package com.apimicroservice.demo.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +12,6 @@ import com.apimicroservice.demo.clients.ClienteClient;
 import com.apimicroservice.demo.clients.ProductosClient;
 import com.apimicroservice.demo.dto.ClienteDTO;
 import com.apimicroservice.demo.dto.ItemRequestDTO;
-import com.apimicroservice.demo.dto.ProductoDTO;
 import com.apimicroservice.demo.dto.VentaDTO;
 import com.apimicroservice.demo.dto.VentaRequestDTO;
 import com.apimicroservice.demo.model.DetalleVenta;
@@ -28,7 +28,7 @@ import lombok.RequiredArgsConstructor;
 public class VentaService {
     private final VentaRepository repository;
     private final ClienteClient client;
-    private final ProductosClient productoClient;
+    private final ProductosClient productosClient;
     private final VentaMapper mapper;
 
     public VentaDTO createVenta(VentaRequestDTO request) {
@@ -36,51 +36,48 @@ public class VentaService {
         ClienteDTO cliente = client.getClienteById(request.getClienteId());
         if (cliente == null) {
             throw new RuntimeException("Cliente con ID " + request.getClienteId() + " no encontrado.");
-        }
-        List<Long> productoBCs = request.getDetalles().stream()
-                .map(ItemRequestDTO::barcode)
-                .toList();
-        List<ProductoDTO> productosDisponibles = productoClient.getProductosBatch(bacode);
-        Map<Long, ProductoDTO> productoMap = productosDisponibles.stream()
-                .collect(Collectors.toMap(ProductoDTO::id, p -> p));
+        } 
+// 1. Agrupar cantidades usando Long como clave del mapa (Barcode -> Cantidad)
+        Map<Long, Integer> itemsToReduce = request.getDetalles().stream()
+            .collect(Collectors.groupingBy(
+                ItemRequestDTO::barcode,
+                Collectors.summingInt(ItemRequestDTO::cantidad)
+            ));
 
-        var venta = new Venta();
-        venta.setClienteId(request.getClienteId());
+        // 2. Despachar la reducción síncrona mediante Feign a ms-productos
+        productosClient.reduceStockBatch(itemsToReduce);
+
+        // 3. Crear los registros locales en la base de datos de ventas
         List<DetalleVenta> detalles = new ArrayList<>();
-        Double total = 0.0;
+        double totalVenta = 0.0;
 
-        for(ItemRequestDTO itemReq : request.getDetalles()) {
-            ProductoDTO prod = productoMap.get(itemReq.productoId());
-            if (prod == null) {
-                throw new RuntimeException("El producto con ID " + itemReq.productoId() + " no existe.");
-            }
-            if (prod.stock() < itemReq.cantidad()) {
-                throw new RuntimeException("Stock insuficiente para: " + prod.name() + 
-                                        ". Disponible: " + prod.stock());
-            }
-
+        for (ItemRequestDTO item : request.getDetalles()) {
             DetalleVenta detalle = new DetalleVenta();
-            detalle.setProductoId(prod.id());
-            detalle.setCantidad(itemReq.cantidad());
-            detalle.setPrecioUnitario(prod.price());
-            detalle.setVenta(venta);
-            total += detalle.getPrecioUnitario() * detalle.getCantidad();
+            detalle.setBarcode(item.barcode());
+            detalle.setCantidad(item.cantidad());
+            
+            // Aquí pones tu lógica para asignar el precio unitario (ej: sacarlo del request o una consulta)
+            double precio = 150.0; 
+            detalle.setPrecioUnitario(precio);
+            detalle.setSubTotal(precio * item.cantidad());
+            
+            totalVenta += detalle.getSubTotal();
             detalles.add(detalle);
         }
 
-        venta.setDetalles(detalles);
+        // 4. Salvar la cabecera de la venta
+        Venta venta = new Venta();
+        venta.setTotal_amount(totalVenta);
+        venta.setDate(LocalDateTime.now());
+        venta.setClienteId(request.getClienteId());
         
-        Map<Long, Double> stockReductions = request.getDetalles().stream()
-                .filter(item -> item != null)
-                .collect(Collectors.toMap(
-                    ItemRequestDTO::productoId,
-                    item -> (double) item.cantidad(),
-                    (existing, newValue) -> existing + newValue
-                ));
-        productoClient.reduceStockBatch(stockReductions);
+        for (DetalleVenta det : detalles) {
+            det.setVenta(venta);
+        }
+        venta.setDetalles(detalles);
 
-        venta.setTotal_amount(total);
-        Venta savedVenta = repository.save(venta);
-        return mapper.toDTO(savedVenta);
+        Venta ventaGuardada = repository.save(venta);
+
+        return mapper.toDTO(ventaGuardada);
     }
 }
