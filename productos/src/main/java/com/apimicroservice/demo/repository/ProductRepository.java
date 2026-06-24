@@ -1,6 +1,7 @@
 package com.apimicroservice.demo.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -13,8 +14,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     public List<Product> findByNameContainingIgnoreCase(String name);
 
     @Modifying
-    @Query("UPDATE Product p SET p.stock = p.stock - :quantity WHERE p.bacode = :id AND p.stock >= :quantity")
+    @Query("UPDATE Product p SET p.stock = p.stock - :quantity WHERE p.barcode = :barcode AND p.stock >= :quantity")
     public int reduceStockByBarcode(@Param("barcode") Long barcode, @Param("quantity") Integer quantity);
 
     boolean existsBy();
+
+    Optional<Product> findByBarcode(Long barcode);
+    List<Product> findByBarcodeIn(List<Long> barcodes);
 }

@@ -38,14 +38,14 @@ public class ProductController {
         return service.getAllProducts();
     }
     
-    @GetMapping("/{id}")
-    public ProductDTO getProduct(@PathVariable Long id) {
-        return service.getProductDTOById(id);
+    @GetMapping("/{barcode}")
+    public ProductDTO getProduct(@PathVariable Long barcode) {
+        return service.getProductDTOByBarcode(barcode);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
-        service.deleteProductById(id);
+    @DeleteMapping("/{barcode}")
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long barcode) {
+        service.deleteProductByBarcode(barcode);
         return ResponseEntity.noContent().build();
     }
 
@@ -59,16 +59,16 @@ public class ProductController {
         return service.searchProductsByNameDTO(name);
     }
 
-    @PostMapping("/{id}/reduce-stock")
-    public ResponseEntity<Void> reduceStock(@PathVariable Long id, @RequestParam Double quantity) {
-        service.reduceStock(id, quantity);
+    @PostMapping("/{barcode}/reduce-stock")
+    public ResponseEntity<Void> reduceStock(@PathVariable Long barcode, @RequestParam Double quantity) {
+        service.reduceStock(barcode, quantity);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/batch")
-    public ResponseEntity<List<ProductDTO>> createProductsBatch(@Valid @RequestBody List<Long> ids) {
-        List<ProductDTO> createdProducts = service.createProductsBatch(ids);
-        return ResponseEntity.ok(createdProducts);
+    public ResponseEntity<List<ProductDTO>> getProductsBatch(@RequestBody List<Long> barcodes) {
+        List<ProductDTO> products = service.getProductsByBarcodeBatch(barcodes); 
+        return ResponseEntity.ok(products);
     }
 
     @PostMapping("/batch/reduce-stock")

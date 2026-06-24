@@ -13,14 +13,14 @@ import com.apimicroservice.demo.dto.ProductoDTO;
 
 @FeignClient(name = "ms-productos", path = "/api/productos")
 public interface ProductosClient {
-    @GetMapping("/{id}")
-    ProductoDTO getProductoById(@PathVariable Long id);
+    @GetMapping("/{barcode}")
+    ProductoDTO getProductoByBarcode(@PathVariable Long barcode);
 
     @GetMapping("/search/{name}")
     List<ProductoDTO> searchProductosByName(@PathVariable String name);
 
-    @PostMapping("/{id}/reduce-stock")
-    void reduceStock(@PathVariable Long id, Double quantity);
+    @PostMapping("/{barcode}/reduce-stock")
+    void reduceStock(@PathVariable Long barcode, Double quantity);
 
     @PostMapping("/batch")
     List<ProductoDTO> getProductosBatch(@RequestBody List<Long> ids);

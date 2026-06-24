@@ -27,13 +27,13 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public ProductDTO getProductDTOById(Long id) {
-        var product = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("El producto con ID " + id + " no existe."));
+    public ProductDTO getProductDTOByBarcode(Long barcode) {
+        var product = repository.findByBarcode(barcode).orElseThrow(() -> new ResourceNotFoundException("El producto con código de barras " + barcode + " no existe."));
         return mapper.toDTO(product);
     }
 
     public ProductDTO updateProductDTO(ProductDTO dto) {
-         var product = repository.findById(dto.id()).orElseThrow(() -> new ResourceNotFoundException("El producto con ID " + dto.id() + " no existe."));
+         var product = repository.findByBarcode(dto.barcode()).orElseThrow(() -> new ResourceNotFoundException("El producto con código de barras " + dto.barcode() + " no existe."));
         mapper.updateProductFromDTO(dto, product);
         var updatedProduct = repository.save(product);
         return mapper.toDTO(updatedProduct);
@@ -45,8 +45,10 @@ public class ProductService {
         return mapper.toDTOList(products);
     }
 
-    public void deleteProductById(Long id) {
-        repository.deleteById(id);
+    public void deleteProductByBarcode(Long barcode) {
+        var product = repository.findByBarcode(barcode)
+            .orElseThrow(() -> new ResourceNotFoundException("El producto con código de barras " + barcode + " no existe."));
+        repository.delete(product);
     }
 
     @Transactional(readOnly = true)
@@ -55,8 +57,8 @@ public class ProductService {
     }
 
     @Transactional
-    public void reduceStock(Long productId, Double quantity) {
-        var product = repository.findById(productId).orElseThrow(() -> new ResourceNotFoundException("El producto con ID " + productId + " no existe."));
+    public void reduceStock(Long barcode, Double quantity) {
+        var product = repository.findByBarcode(barcode).orElseThrow(() -> new ResourceNotFoundException("El producto con código de barras " + barcode + " no existe."));
         if (product.getStock() < quantity) {
             throw new RuntimeException("Stock insuficiente para el producto: " + product.getName());
         }
@@ -64,22 +66,22 @@ public class ProductService {
         repository.save(product);
     }
 
-    @Transactional(readOnly = true)
-    public List<ProductDTO> createProductsBatch(List<Long> ids) {
-        if(ids == null || ids.isEmpty()) {
-            throw new IllegalArgumentException("La lista de IDs no puede estar vacía.");
-        }
-        var products = repository.findAllById(ids);
-        return mapper.toDTOList(products);
-    }
-
     @Transactional
     public void reduceStockBatch(Map<Long, Integer> entry) {
         entry.forEach((barcode, quantity) -> {
             int updateRows = repository.reduceStockByBarcode(barcode, quantity);
             if(updateRows == 0) {
-                throw new RuntimeException("Stock insuficiente para el producto con ID: " + barcode);
+                throw new RuntimeException("Stock insuficiente para el producto con código de barras: " + barcode);
             }
         });
     }
+
+    @Transactional(readOnly = true)
+    public List<ProductDTO> getProductsByBarcodeBatch(List<Long> barcodes) {
+    if(barcodes == null || barcodes.isEmpty()) {
+        throw new IllegalArgumentException("La lista de códigos de barras no puede estar vacía.");
+    }
+    var products = repository.findByBarcodeIn(barcodes); 
+    return mapper.toDTOList(products);
+}
 }
