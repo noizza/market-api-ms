@@ -69,6 +69,8 @@ public class VentaService {
         venta.setTotal_amount(totalVenta);
         venta.setDate(LocalDateTime.now());
         venta.setClienteId(request.getClienteId());
+
+        venta.setPaymentMethod(request.getPaymentMethod());
         
         for (DetalleVenta det : detalles) {
             det.setVenta(venta);

@@ -30,6 +30,8 @@ public class Venta {
     private Double total_amount;
     private LocalDateTime date;
 
+    private Integer paymentMethod; // 1: Efectivo, 2: Tarjeta, 3: Transferencia, 4: Fiado
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "venta")
     private List<DetalleVenta> detalles;
 
