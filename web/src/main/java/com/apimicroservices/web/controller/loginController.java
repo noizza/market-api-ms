@@ -4,13 +4,20 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.apimicroservices.web.model.loginForm;
+import com.apimicroservices.web.service.loginService;
+
+import lombok.RequiredArgsConstructor;
 
 
 
 @Controller
+@RequiredArgsConstructor
 public class loginController {
+    private final loginService service;
+
     @GetMapping("/")
     public String index() {
         return "index";
@@ -24,13 +31,7 @@ public class loginController {
     }
 
     @PostMapping("/login")
-    public String loginProcess(loginForm loginForm, Model model) {
-        if(loginForm.getUsername().equals("admin") && loginForm.getPassword().equals("admin")) {
-            model.addAttribute("username", loginForm.getUsername());
-            return "index";
-        } else {
-            model.addAttribute("error", "Credenciales inválidas");
-            return "login";
-        }
+    public String loginProcess(loginForm loginForm, RedirectAttributes redirectAttributes, Model model) {
+        return service.login(loginForm, redirectAttributes, model);
     }
 }

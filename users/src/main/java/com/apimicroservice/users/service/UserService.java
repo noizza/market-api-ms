@@ -45,9 +45,9 @@ public class UserService {
     }
 
     public String login(LoginRequestDTO req) {
-        User user = repository.findByName(req.name())
+        User user = repository.findByName(req.username())
             .orElseThrow(() -> new BadCredentialsException("Invalid username or password"));
-        if (!passwordEncoder.matches(req.pass(), user.getPassword())) {
+        if (!passwordEncoder.matches(req.password(), user.getPassword())) {
             throw new BadCredentialsException("Invalid username or password");
         }
 
