@@ -9,4 +9,5 @@ import lombok.Setter;
 public class loginForm {
     private String username;
     private String password;
+    private boolean rememberMe;
 }
