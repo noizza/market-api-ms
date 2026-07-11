@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" 
+      th:replace="~{layout/main-layout :: layout(~{:: #contenido-centro})}">
+<body>
+
+    <!-- Todo este bloque se meterá en el 'content-area' del Layout Base forcing full height layout -->
+    <div id="contenido-centro" th:fragment="contenido-centro" class="h-100 d-flex flex-column">
+        
+        <div class="breadcrumb-text flex-shrink-0" id="breadcrumb">Terminal > Nueva Venta</div>
+        
+        <div class="pos-card">
+            <!-- CONTENEDOR FIJO SUPERIOR -->
+            <div class="flex-shrink-0">
+                <!-- BUSCADOR CENTRAL SUPERIOR CON ACCESOS ICONOGRÁFICOS -->
+                <div class="search-block">
+                    <!-- Contenedor relativo para alinear el panel flotante -->
+                    <div class="input-group search-input-group position-relative">
+                        <span class="input-group-text border-end-0">
+                            <span class="material-icons-outlined">search</span>
+                        </span>
+                        <input type="text" id="kiosco-search" class="form-control border-start-0" placeholder="Escriba código de barras o nombre del producto (F2)..." autofocus autocomplete="off">
+                        
+                        <!-- PANEL FLOTANTE PRINCIPAL -->
+                        <div id="productos-sugeridos-panel" class="dropdown-menu w-100 shadow border mt-1" 
+                            style="display: none; max-height: 280px; overflow-y: auto; z-index: 1050; background: var(--bg-card); position: absolute; top: 100%; left: 0;">
+                            
+                            <div th:fragment="sugerencias-buscador" id="sugerencias-ajax-content" class="w-100">
+                                
+                                <div th:each="prod : ${products}" 
+                                    class="dropdown-item sugerencia-item d-flex justify-content-between align-items-center py-2 px-3 text-start"
+                                    style="color: var(--text-main); cursor: pointer;"
+                                    role="button"
+                                    tabindex="0"
+                                    th:data-barcode="${prod.barcode}"
+                                    th:data-name="${prod.name}"
+                                    th:data-price="${prod.price}">
+                                    <span th:text="${prod.name}">Nombre</span>
+                                    <span class="badge bg-secondary opacity-75" th:text="${'$' + prod.price}">$0.00</span>
+                                </div>
+                                
+                                <div th:if="${#lists.isEmpty(products)}" class="text-muted p-3 text-center small">
+                                    No se encontraron productos coincidentes.
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-microsoft-accent d-flex align-items-center" type="button" title="Seleccionar Cliente">
+                            <span class="material-icons-outlined">person_add_alt</span>
+                        </button>
+                        <button class="btn btn-microsoft-accent d-flex align-items-center" type="button" title="Devolución / Nota de Crédito">
+                            <span class="material-icons-outlined">assignment_return</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- METADATOS DE LA OPERACIÓN -->
+                <div class="meta-info-strip d-flex flex-wrap justify-content-between gap-3">
+                    <div><strong>Cliente N°:</strong> 40291 - Consumidor Final</div>
+                    <div><strong>Venta N°:</strong> TXN-2026-00892</div>
+                    <div><strong>Fecha/Hora:</strong> 06/07/2026 14:05</div>
+                    <div><strong>Vendedor:</strong> Alex Rivera</div>
+                </div>
+            </div>
+
+            <!-- TABLA DE ARTÍCULOS DETALLADA (CONTENEDOR ÚNICO QUE SCROLLEA) -->
+            <div class="table-responsive-container">
+                <table class="pos-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 80px;">N°</th>
+                            <th>Nombre del Producto</th>
+                            <th style="width: 120px; text-align: center;">Cant.</th>
+                            <th style="width: 160px; text-align: right;">P. Unitario</th>
+                            <th style="width: 180px; text-align: right; padding-right: 60px;">Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-productos-body">
+                        <tr id="fila-vacia-mensaje">
+                            <td colspan="5" class="text-center py-4" style="color: var(--text-muted); font-size: 14px;">
+                                Ningún producto seleccionado en esta venta. use el buscador superior.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- SECCIÓN INFERIOR DE CIERRE (MÉTODOS Y TOTAL - FIJOS ABAJO) -->
+            <div class="checkout-section flex-shrink-0">
+                <div class="row g-3 align-items-center">
+                    <!-- Selección Cuadrada de Métodos de Pago -->
+                    <div class="col-lg-8 col-md-7">
+                        <div class="payment-grid">
+                            <button class="btn btn-pay-method">
+                                <span class="material-icons-outlined">payments</span>
+                                Efectivo
+                            </button>
+                            <button class="btn btn-pay-method">
+                                <span class="material-icons-outlined">qr_code_2</span>
+                                QR
+                            </button>
+                            <button class="btn btn-pay-method">
+                                <span class="material-icons-outlined">credit_card</span>
+                                Tarjeta
+                            </button>
+                            <button class="btn btn-pay-method">
+                                <span class="material-icons-outlined">account_balance</span>
+                                Transferencia
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Bloque de Total Corporativo Fijo -->
+                    <div class="col-lg-4 col-md-5">
+                        <div class="total-box">
+                            <span class="total-label">Total a Cobrar</span>
+                            <span class="total-amount">$370,000.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- EXPLICACIÓN: El script se ubica antes de cerrar el div 'contenido-centro' para asegurar su carga en el Layout -->
+<script>
+            const searchInput = document.getElementById('kiosco-search');
+            const sugeridosPanel = document.getElementById('productos-sugeridos-panel');
+            const tablaBody = document.getElementById('tabla-productos-body');
+            let contadorFilas = 0;
+            
+            // EXPLICACIÓN: Esta variable guardará la posición de la sugerencia seleccionada actualmente con las flechas (-1 significa ninguna)
+            let indiceFocoSugerencia = -1;
+
+            // 1. ESCUCHAR LA ESCRITURA: Llama a Spring y despliega el rectángulo
+            searchInput.addEventListener('input', function(e) {
+                const texto = e.target.value;
+                indiceFocoSugerencia = -1; // Reiniciamos el índice cada vez que el usuario escribe algo nuevo
+
+                if (texto.trim().length < 2) {
+                    sugeridosPanel.style.display = 'none';
+                    return;
+                }
+
+                fetch(`/ventas/buscar-producto?text=${encodeURIComponent(texto)}`)
+                    .then(response => response.text())
+                    .then(htmlFragment => {
+                        sugeridosPanel.innerHTML = htmlFragment;
+                        sugeridosPanel.style.display = 'block';
+                        vincularEventosSugerencias();
+                    })
+                    .catch(error => console.error('Error al sugerir:', error));
+            });
+
+            // 2. DETECTAR SELECCIÓN POR CLIC DEL MOUSE
+            function vincularEventosSugerencias() {
+                const items = sugeridosPanel.querySelectorAll('.sugerencia-item');
+                items.forEach((item, index) => {
+                    item.addEventListener('click', function() {
+                        seleccionarItem(this);
+                    });
+                    
+                    // Si el usuario pasa el mouse por encima, actualizamos el índice para que no se desfase con el teclado
+                    item.addEventListener('mouseenter', function() {
+                        removerEstiloFoco();
+                        indiceFocoSugerencia = index;
+                        this.classList.add('active');
+                    });
+                });
+            }
+
+            // 3. CONTROL DE TECLADO INTERACTIVO (Flecha Abajo, Arriba y Enter)
+            searchInput.addEventListener('keydown', function(e) {
+                const items = sugeridosPanel.querySelectorAll('.sugerencia-item');
+                if (sugeridosPanel.style.display === 'none' || items.length === 0) return;
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault(); // Detiene el comportamiento nativo que rompía el foco
+                    indiceFocoSugerencia++;
+                    if (indiceFocoSugerencia >= items.length) indiceFocoSugerencia = 0;
+                    actualizarSugerenciaEnfocada(items);
+
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    indiceFocoSugerencia--;
+                    if (indiceFocoSugerencia < 0) indiceFocoSugerencia = items.length - 1;
+                    actualizarSugerenciaEnfocada(items);
+
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (indiceFocoSugerencia > -1 && items[indiceFocoSugerencia]) {
+                        items[indiceFocoSugerencia].click();
+                    } else if (items[0]) {
+                        items[0].click();
+                    }
+                }
+            });
+
+            // Cambia visualmente el color de la sugerencia pre-seleccionada usando las clases nativas de Bootstrap (.active)
+            function actualizarSugerenciaEnfocada(items) {
+                removerEstiloFoco();
+                const itemActivo = items[indiceFocoSugerencia];
+                if (itemActivo) {
+                    itemActivo.classList.add('active');
+                    // Asegura que el scroll acompañe si hay muchos productos en la lista flotante
+                    itemActivo.scrollIntoView({ block: 'nearest' }); 
+                }
+            }
+
+            function removerEstiloFoco() {
+                const items = sugeridosPanel.querySelectorAll('.sugerencia-item');
+                items.forEach(item => item.classList.remove('active'));
+            }
+
+            function seleccionarItem(elemento) {
+                const datos = {
+                    barcode: elemento.getAttribute('data-barcode'),
+                    name: elemento.getAttribute('data-name'),
+                    price: parseFloat(elemento.getAttribute('data-price'))
+                };
+                agregarProductoALista(datos);
+            }
+
+            // 4. CERRAR PANEL SI SE HACE CLIC AFUERA
+            document.addEventListener('click', function(e) {
+                if (!searchInput.contains(e.target) && !sugeridosPanel.contains(e.target)) {
+                    sugeridosPanel.style.display = 'none';
+                }
+            });
+
+            // 5. AGREGAR ITEM A LA TABLA INFERIOR
+            function agregarProductoALista(producto) {
+                const mensajeVacio = document.getElementById('fila-vacia-mensaje');
+                if (mensajeVacio) mensajeVacio.remove();
+
+                contadorFilas++;
+                const precioFormateado = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(producto.price);
+                const nuevaFila = document.createElement('tr');
+                
+                nuevaFila.innerHTML = `
+                    <td>${contadorFilas}</td>
+                    <td>${producto.name}</td>
+                    <td class="text-center">1</td>
+                    <td class="text-end">${precioFormateado}</td>
+                    <td class="text-end" style="position: relative; padding-right: 60px; font-weight: 600;">${precioFormateado}
+                        <div class="delete-overlay" style="opacity: 1; pointer-events: auto;">
+                            <button class="btn-delete-row" title="Quitar item" onclick="this.closest('tr').remove(); verificarTablaVacia();">
+                                <span class="material-icons-outlined" style="font-size: 16px;">close</span>
+                            </button>
+                        </div>
+                    </td>
+                `;
+
+                tablaBody.appendChild(nuevaFila);
+                searchInput.value = '';
+                sugeridosPanel.style.display = 'none';
+                indiceFocoSugerencia = -1;
+                searchInput.focus();
+            }
+
+            function verificarTablaVacia() {
+                if (tablaBody.children.length === 0) {
+                    contadorFilas = 0;
+                    tablaBody.innerHTML = `
+                        <tr id="fila-vacia-mensaje">
+                            <td colspan="5" class="text-center py-4" style="color: var(--text-muted); font-size: 14px;">
+                                Ningún producto seleccionado en esta venta. Use el buscador superior.
+                            </td>
+                        </tr>`;
+                }
+            }
+        </script>
+    </div>
+
+</body>
+</html>

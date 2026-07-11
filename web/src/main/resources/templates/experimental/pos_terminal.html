@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contoso Retail POS - Terminal Unificada</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Iconos de Google -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <style>
+        /* ==========================================================================
+           VARIABLES DE COLOR (Aisladas por Tema para evitar que se rompa)
+           ========================================================================== */
+        :root {
+            /* MODO CLARO (Tu estilo original guardado) */
+            --bg-main: #f3f2f1;
+            --bg-topbar: #002050;
+            --bg-sidebar: #ffffff;
+            --bg-card: #ffffff;
+            --bg-strip: #faf9f8;
+            --bg-table-header: #faf9f8;
+            --bg-input: #ffffff;
+            --bg-btn-accent: #f3f2f1;
+            --bg-btn-accent-hover: #edebe9;
+            --bg-btn-pay: #ffffff;
+            --bg-btn-pay-hover: #f3f2f1;
+            --bg-btn-delete: #fde7e9;
+            
+            --border-color: #edebe9;
+            --border-input: #ced4da;
+            --border-btn-delete: #f3d0d3;
+            
+            --text-main: #323130;
+            --text-muted: #605e5c;
+            --text-navbar-input: #ffffff;
+            --text-btn-accent: #323130;
+            --text-btn-delete: #a80000;
+            
+            --shadow-card: 0 1.6px 3.6px rgba(0,0,0,0.11);
+            --topbar-search-bg: rgba(255, 255, 255, 0.15);
+        }
+
+        body.dark-theme {
+            /* MODO OSCURO (Tu estilo oscuro guardado) */
+            --bg-main: #111111;
+            --bg-topbar: #0a0a0a;
+            --bg-sidebar: #1e1e1e;
+            --bg-card: #1e1e1e;
+            --bg-strip: #252526;
+            --bg-table-header: #252526;
+            --bg-input: #252526;
+            --bg-btn-accent: #2d2d2d;
+            --bg-btn-accent-hover: #3e3e42;
+            --bg-btn-pay: #252526;
+            --bg-btn-pay-hover: #2d2d2d;
+            --bg-btn-delete: #5a1c1c;
+            
+            --border-color: #2d2d2d;
+            --border-input: #3c3c3c;
+            --border-btn-delete: #7a2c2c;
+            
+            --text-main: #f5f5f5;
+            --text-muted: #aaaaaa;
+            --text-navbar-input: #ffffff;
+            --text-btn-accent: #ffffff;
+            --text-btn-delete: #ff8888;
+            
+            --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.3);
+            --topbar-search-bg: rgba(255, 255, 255, 0.08);
+        }
+
+        /* ==========================================================================
+           ESTRUCTURA FIJA (No cambia entre temas)
+           ========================================================================== */
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- BARRA SUPERIOR --- */
+        .top-bar {
+            background-color: var(--bg-topbar);
+            color: #ffffff;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 1030;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .top-bar-left, .top-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .top-bar-right { gap: 16px; }
+
+        .brand {
+            font-weight: 600;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+        }
+
+        .top-search { width: 350px; }
+        
+        .top-search input {
+            height: 32px;
+            background-color: var(--topbar-search-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-navbar-input);
+            font-size: 14px;
+            padding-left: 12px;
+        }
+        
+        .top-search input::placeholder { color: var(--text-muted); }
+
+        .theme-toggle-btn {
+            background: none;
+            border: none;
+            color: #ffffff;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+        .theme-toggle-btn:hover { background-color: rgba(255,255,255,0.1); }
+
+        .user-profile { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+        
+        .avatar {
+            width: 32px;
+            height: 32px;
+            background-color: #0078d4;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            color: white;
+        }
+
+        /* --- CONTENEDOR PRINCIPAL --- */
+        .main-container { display: flex; flex: 1; overflow: hidden; }
+
+        /* --- MENÚ LATERAL --- */
+        .sidebar {
+            width: 220px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 16px 0;
+            height: 100%;
+        }
+
+        .nav-group { display: flex; flex-direction: column; gap: 4px; }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 24px;
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 14px;
+            gap: 12px;
+            cursor: pointer;
+            opacity: 0.85;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background-color: var(--bg-main);
+            font-weight: 600;
+            color: var(--text-main);
+            opacity: 1;
+        }
+
+        .nav-item.active {
+            border-left: 4px solid #0078d4;
+            padding-left: 20px;
+        }
+
+        /* --- ÁREA DE CONTENIDO TERMINAL --- */
+        .content-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-main);
+        }
+
+        .breadcrumb-text { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+        
+        .pos-card {
+            background: var(--bg-card);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: var(--shadow-card);
+            border: 1px solid var(--border-color);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+        }
+
+        /* Buscador Superior */
+        .search-block { max-width: 700px; margin: 0 auto 15px auto; width: 100%; }
+        
+        .search-input-group .form-control {
+            background-color: var(--bg-input);
+            border-color: var(--border-input);
+            color: var(--text-main);
+            padding-left: 15px;
+        }
+        .search-input-group .form-control:focus {
+            background-color: var(--bg-input);
+            color: var(--text-main);
+            border-color: #0078d4;
+            box-shadow: none;
+        }
+        .search-input-group .input-group-text {
+            background-color: var(--bg-input);
+            border-color: var(--border-input);
+            color: var(--text-muted);
+        }
+
+        .btn-microsoft-accent {
+            background-color: var(--bg-btn-accent);
+            border: 1px solid var(--border-input);
+            color: var(--text-btn-accent);
+        }
+        .btn-microsoft-accent:hover {
+            background-color: var(--bg-btn-accent-hover);
+            border-color: var(--border-input);
+            color: var(--text-btn-accent);
+        }
+
+        /* Tira informativa de la venta */
+        .meta-info-strip {
+            background-color: var(--bg-strip);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px 16px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        .meta-info-strip strong { color: var(--text-main); }
+
+        /* --- TABLA DE PRODUCTOS --- */
+        .table-responsive-container {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--bg-card);
+        }
+
+        .pos-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        
+        .pos-table th {
+            background-color: var(--bg-table-header);
+            color: var(--text-muted);
+            font-weight: 600;
+            padding: 12px 16px;
+            border-bottom: 2px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .pos-table tbody tr {
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+        }
+        .pos-table tbody tr:hover { background-color: var(--bg-table-header); }
+        .pos-table td { padding: 14px 16px; color: var(--text-main); vertical-align: middle; }
+
+        /* Botón de borrado interactivo a la derecha */
+        .delete-overlay {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+        .pos-table tbody tr:hover .delete-overlay { opacity: 0.7; pointer-events: auto; }
+        .pos-table tbody tr:hover .delete-overlay:hover { opacity: 1; }
+        
+        .btn-delete-row {
+            background-color: var(--bg-btn-delete);
+            color: var(--text-btn-delete);
+            border: 1px solid var(--border-btn-delete);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            cursor: pointer;
+        }
+
+        /* --- SECCIÓN INFERIOR: BOTONES Y TOTAL --- */
+        .checkout-section { border-top: 1px solid var(--border-color); padding-top: 20px; }
+        .payment-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        
+        .btn-pay-method {
+            background-color: var(--bg-btn-pay);
+            border: 1px solid var(--border-input);
+            border-radius: 6px;
+            height: 75px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            color: var(--text-main);
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .btn-pay-method:hover {
+            background-color: var(--bg-btn-pay-hover);
+            border-color: #0078d4;
+            color: #0078d4;
+        }
+        .btn-pay-method .material-icons-outlined { color: var(--text-muted); }
+        .btn-pay-method:hover .material-icons-outlined { color: #0078d4; }
+
+        /* Caja Verde Administrativa Inalterada */
+        .total-box {
+            background-color: #107c41;
+            color: #ffffff;
+            border-radius: 6px;
+            padding: 16px 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-end;
+            height: 75px;
+            box-shadow: 0 4px 12px rgba(16,124,65,0.3);
+        }
+        .total-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.9; }
+        .total-amount { font-size: 28px; font-weight: 700; line-height: 1; }
+    </style>
+</head>
+<body>
+
+    <!-- BARRA SUPERIOR -->
+    <header class="top-bar">
+        <div class="top-bar-left">
+            <span class="material-icons-outlined" style="cursor: pointer;">apps</span>
+            <div class="brand">Contoso <span style="font-weight:300;">| POS Terminal</span></div>
+            <div class="top-search d-none d-md-block">
+                <input type="text" class="form-control" placeholder="Buscar globalmente (F1)...">
+            </div>
+        </div>
+        <div class="top-bar-right">
+            <!-- Botón del Conmutador de Tema (Modo Claro/Oscuro) -->
+            <button class="theme-toggle-btn" id="themeToggle" title="Cambiar a Modo Oscuro">
+                <span class="material-icons-outlined" id="themeIcon">dark_mode</span>
+            </button>
+            <span class="material-icons-outlined" style="cursor: pointer;">settings</span>
+            <div class="user-profile">
+                <span th:text="${username} + '(Caja 01)'"></span>
+                <div class="avatar">AR</div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- MENÚ LATERAL -->
+        <nav class="sidebar">
+            <div class="nav-group">
+                <a href="#" class="nav-item"><span class="material-icons-outlined">home</span>Inicio</a>
+                <a href="#" class="nav-item active"><span class="material-icons-outlined">point_of_sale</span>Ventas</a>
+                <a href="#" class="nav-item"><span class="material-icons-outlined">inventory_2</span>Inventario</a>
+                <a href="#" class="nav-item"><span class="material-icons-outlined">people</span>Clientes</a>
+                <a href="#" class="nav-item"><span class="material-icons-outlined">bar_chart</span>Reportes</a>
+                <a href="#" class="nav-item"><span class="material-icons-outlined">badge</span>Personal</a>
+            </div>
+            <div class="nav-group">
+                <a href="#" class="nav-item"><span class="material-icons-outlined">settings</span>Configuración</a>
+                <a href="#" class="nav-item"><span class="material-icons-outlined">help</span>Ayuda</a>
+            </div>
+        </nav>
+
+        <!-- ÁREA DE CONTENIDO TERMINAL -->
+        <main class="content-area">
+            <div class="breadcrumb-text" id="breadcrumb">Terminal > Nueva Venta</div>
+            
+            <div class="pos-card">
+                <div>
+                    <!-- BUSCADOR CENTRAL SUPERIOR CON ACCESOS ICONOGRÁFICOS -->
+                    <div class="search-block">
+                        <div class="input-group search-input-group">
+                            <span class="input-group-text border-end-0">
+                                <span class="material-icons-outlined">search</span>
+                            </span>
+                            <input type="text" class="form-control border-start-0" placeholder="Escriba código de barras o nombre del producto (F2)..." autofocus>
+                            <button class="btn btn-microsoft-accent d-flex align-items-center" type="button" title="Seleccionar Cliente">
+                                <span class="material-icons-outlined">person_add_alt</span>
+                            </button>
+                            <button class="btn btn-microsoft-accent d-flex align-items-center" type="button" title="Devolución / Nota de Crédito">
+                                <span class="material-icons-outlined">assignment_return</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- METADATOS DE LA OPERACIÓN -->
+                    <div class="meta-info-strip d-flex flex-wrap justify-content-between gap-3">
+                        <div><strong>Cliente N°:</strong> 40291 - Consumidor Final</div>
+                        <div><strong>Venta N°:</strong> TXN-2026-00892</div>
+                        <div><strong>Fecha/Hora:</strong> 06/07/2026 14:05</div>
+                        <div><strong>Vendedor:</strong> Alex Rivera</div>
+                    </div>
+                </div>
+
+                <!-- TABLA DE ARTÍCULOS DETALLADA -->
+                <div class="table-responsive-container">
+                    <table class="pos-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px;">N°</th>
+                                <th>Nombre del Producto</th>
+                                <th style="width: 120px; text-align: center;">Cant.</th>
+                                <th style="width: 160px; text-align: right;">P. Unitario</th>
+                                <th style="width: 180px; text-align: right; padding-right: 60px;">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>Monitor Gamer LG UltraWide 29" IPS</td>
+                                <td class="text-center">1</td>
+                                <td class="text-end">$280,000.00</td>
+                                <td class="text-end" style="padding-right: 60px; font-weight: 600;">$280,000.00</td>
+                                <div class="delete-overlay">
+                                    <button class="btn-delete-row" title="Quitar item">
+                                        <span class="material-icons-outlined" style="font-size: 16px;">close</span>
+                                    </button>
+                                </div>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>Teclado Mecánico Redragon Mitra RGB (Blue Switch)</td>
+                                <td class="text-center">2</td>
+                                <td class="text-end">$45,000.00</td>
+                                <td class="text-end" style="padding-right: 60px; font-weight: 600;">$90,000.00</td>
+                                <div class="delete-overlay">
+                                    <button class="btn-delete-row" title="Quitar item">
+                                        <span class="material-icons-outlined" style="font-size: 16px;">close</span>
+                                    </button>
+                                </div>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>Mouse Óptico Logitech G203 Lightsync Black</td>
+                                <td class="text-center">1</td>
+                                <td class="text-end">$28,500.00</td>
+                                <td class="text-end" style="padding-right: 60px; font-weight: 600;">$28,500.00</td>
+                                <div class="delete-overlay">
+                                    <button class="btn-delete-row" title="Quitar item">
+                                        <span class="material-icons-outlined" style="font-size: 16px;">close</span>
+                                    </button>
+                                </div>
+                            </tr>
+                            <tr>
+                                <td>4</td>
+                                <td>Auriculares HyperX Cloud Flight Wireless</td>
+                                <td class="text-center">1</td>
+                                <td class="text-end">$115,000.00</td>
+                                <td class="text-end" style="padding-right: 60px; font-weight: 600;">$115,000.00</td>
+                                <div class="delete-overlay">
+                                    <button class="btn-delete-row" title="Quitar item">
+                                        <span class="material-icons-outlined" style="font-size: 16px;">close</span>
+                                    </button>
+                                </div>
+                            </tr>
+                                                        <tr>
+                                <td>4</td>
+                                <td>Auriculares HyperX Cloud Flight Wireless</td>
+                                <td class="text-center">1</td>
+                                <td class="text-end">$115,000.00</td>
+                                <td class="text-end" style="padding-right: 60px; font-weight: 600;">$115,000.00</td>
+                                <div class="delete-overlay">
+                                    <button class="btn-delete-row" title="Quitar item">
+                                        <span class="material-icons-outlined" style="font-size: 16px;">close</span>
+                                    </button>
+                                </div>
+                            </tr>
+                                                        <tr>
+                                <td>4</td>
+                                <td>Auriculares HyperX Cloud Flight Wireless</td>
+                                <td class="text-center">1</td>
+                                <td class="text-end">$115,000.00</td>
+                                <td class="text-end" style="padding-right: 60px; font-weight: 600;">$115,000.00</td>
+                                <div class="delete-overlay">
+                                    <button class="btn-delete-row" title="Quitar item">
+                                        <span class="material-icons-outlined" style="font-size: 16px;">close</span>
+                                    </button>
+                                </div>
+                            </tr>
+                                                        <tr>
+                                <td>4</td>
+                                <td>Auriculares HyperX Cloud Flight Wireless</td>
+                                <td class="text-center">1</td>
+                                <td class="text-end">$115,000.00</td>
+                                <td class="text-end" style="padding-right: 60px; font-weight: 600;">$115,000.00</td>
+                                <div class="delete-overlay">
+                                    <button class="btn-delete-row" title="Quitar item">
+                                        <span class="material-icons-outlined" style="font-size: 16px;">close</span>
+                                    </button>
+                                </div>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- SECCIÓN INFERIOR DE CIERRE (MÉTODOS Y TOTAL) -->
+                <div class="checkout-section">
+                    <div class="row g-3 align-items-center">
+                        <!-- Selección Cuadrada de Métodos de Pago -->
+                        <div class="col-lg-8 col-md-7">
+                            <div class="payment-grid">
+                                <button class="btn btn-pay-method">
+                                    <span class="material-icons-outlined">payments</span>
+                                    Efectivo
+                                </button>
+                                <button class="btn btn-pay-method">
+                                    <span class="material-icons-outlined">qr_code_2</span>
+                                    QR
+                                </button>
+                                <button class="btn btn-pay-method">
+                                    <span class="material-icons-outlined">credit_card</span>
+                                    Tarjeta
+                                </button>
+                                <button class="btn btn-pay-method">
+                                    <span class="material-icons-outlined">account_balance</span>
+                                    Transferencia
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Bloque de Total Corporativo Fijo -->
+                        <div class="col-lg-4 col-md-5">
+                            <div class="total-box">
+                                <span class="total-label">Total a Cobrar</span>
+                                <span class="total-amount">$513,500.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- SCRIPT DE LOGICA INTERACTIVA DE ENTORNO -->
+    <script>
+        const toggleBtn = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const breadcrumb = document.getElementById('breadcrumb');
+
+        toggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-theme');
+            
+            if(document.body.classList.contains('dark-theme')) {
+                themeIcon.textContent = 'light_mode';
+                breadcrumb.textContent = 'Terminal > Nueva Venta (Modo Oscuro)';
+                toggleBtn.title = "Cambiar a Modo Claro";
+            } else {
+                themeIcon.textContent = 'dark_mode';
+                breadcrumb.textContent = 'Terminal > Nueva Venta';
+                toggleBtn.title = "Cambiar a Modo Oscuro";
+            }
+        });
+    </script>
+</body>
+</html>

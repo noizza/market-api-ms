@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(content)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contoso Retail POS - Terminal Unificada</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Iconos de Google -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <style>
+        /* ==========================================================================
+           VARIABLES DE COLOR (Aisladas por Tema para evitar que se rompa)
+           ========================================================================== */
+        :root {
+            /* MODO CLARO */
+            --bg-main: #f3f2f1;
+            --bg-topbar: #002050;
+            --bg-sidebar: #ffffff;
+            --bg-card: #ffffff;
+            --bg-strip: #faf9f8;
+            --bg-table-header: #faf9f8;
+            --bg-input: #ffffff;
+            --bg-btn-accent: #f3f2f1;
+            --bg-btn-accent-hover: #edebe9;
+            --bg-btn-pay: #ffffff;
+            --bg-btn-pay-hover: #f3f2f1;
+            --bg-btn-delete: #fde7e9;
+            
+            --border-color: #edebe9;
+            --border-input: #ced4da;
+            --border-btn-delete: #f3d0d3;
+            
+            --text-main: #323130;
+            --text-muted: #605e5c;
+            --text-navbar-input: #ffffff;
+            --text-btn-accent: #323130;
+            --text-btn-delete: #a80000;
+            
+            --shadow-card: 0 1.6px 3.6px rgba(0,0,0,0.11);
+            --topbar-search-bg: rgba(255, 255, 255, 0.15);
+        }
+
+        body.dark-theme {
+            /* MODO OSCURO */
+            --bg-main: #111111;
+            --bg-topbar: #0a0a0a;
+            --bg-sidebar: #1e1e1e;
+            --bg-card: #1e1e1e;
+            --bg-strip: #252526;
+            --bg-table-header: #252526;
+            --bg-input: #252526;
+            --bg-btn-accent: #2d2d2d;
+            --bg-btn-accent-hover: #3e3e42;
+            --bg-btn-pay: #252526;
+            --bg-btn-pay-hover: #2d2d2d;
+            --bg-btn-delete: #5a1c1c;
+            
+            --border-color: #2d2d2d;
+            --border-input: #3c3c3c;
+            --border-btn-delete: #7a2c2c;
+            
+            --text-main: #f5f5f5;
+            --text-muted: #aaaaaa;
+            --text-navbar-input: #ffffff;
+            --text-btn-accent: #ffffff;
+            --text-btn-delete: #ff8888;
+            
+            --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.3);
+            --topbar-search-bg: rgba(255, 255, 255, 0.08);
+        }
+
+        /* ==========================================================================
+           ESTRUCTURA FIJA (Ajustada para asegurar alto total sin scroll externo)
+           ========================================================================== */
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+        }
+
+        html, body {
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* --- BARRA SUPERIOR --- */
+        .top-bar {
+            background-color: var(--bg-topbar);
+            color: #ffffff;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 1030;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .top-bar-left, .top-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .top-bar-right { gap: 16px; }
+
+        .brand {
+            font-weight: 600;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+        }
+
+        .theme-toggle-btn {
+            background: none;
+            border: none;
+            color: #ffffff;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+        .theme-toggle-btn:hover { background-color: rgba(255,255,255,0.1); }
+
+        .user-profile { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+        
+        .avatar {
+            width: 32px;
+            height: 32px;
+            background-color: #0078d4;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            color: white;
+        }
+
+        /* --- CONTENEDOR PRINCIPAL --- */
+        .main-container { 
+            display: flex; 
+            flex: 1; 
+            height: calc(100vh - 48px);
+            overflow: hidden; 
+        }
+
+        /* --- MENÚ LATERAL --- */
+/* --- MENÚ LATERAL --- */
+        .sidebar {
+            width: 220px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 16px 0;
+            height: 100%;
+            flex-shrink: 0;
+            
+            /* Efecto flotante en móviles (¡ESTO ERA LO QUE FALTA!) */
+            position: fixed;
+            top: 48px; /* debajo del topbar */
+            left: -220px; /* Escondido por defecto */
+            z-index: 1020;
+            transition: left 0.25s ease-in-out, background-color 0.15s ease;
+        }
+
+        /* Cuando tenga la clase 'show', se desliza hacia adentro */
+        .sidebar.show {
+            left: 0;
+        }
+ 
+        /* ==========================================================================
+        OPTIMIZACIONES PARA CELULARES Y TABLETS (Pantallas < 768px)
+        ========================================================================== */
+        @media (max-width: 767.98px) {
+            /* Reducimos el padding general para ganar espacio */
+            .content-area {
+                padding: 8px !important;
+            }
+            
+            .pos-card {
+                padding: 12px !important;
+                border-radius: 4px !important;
+            }
+
+            .table-responsive-container {
+                margin-bottom: 12px !important;
+            }
+
+            /* La barra de búsqueda central y accesos de iconos */
+            .search-block {
+                margin-bottom: 10px !important;
+            }
+            
+            /* Tira informativa de la venta: de fila horizontal a bloques apilados */
+            .meta-info-strip {
+                padding: 8px 12px !important;
+                margin-bottom: 12px !important;
+                font-size: 12px !important;
+                display: grid !important;
+                grid-template-columns: repeat(2, 1fr); /* 2 columnas en celular */
+                gap: 6px !important;
+            }
+
+            /* Tabla de productos adaptable para dedos */
+            .pos-table th {
+                padding: 8px !important;
+                font-size: 12px;
+            }
+            
+            .pos-table td {
+                padding: 10px 8px !important;
+                font-size: 13px;
+            }
+            
+            /* El botón de borrado en móviles debe estar siempre visible 
+            (no por hover, porque en táctil no hay mouse) */
+            .delete-overlay {
+                position: static !important;
+                transform: none !important;
+                opacity: 1 !important;
+                pointer-events: auto !important;
+                display: flex;
+                justify-content: center;
+            }
+            
+            /* Modificamos el header de la tabla para hacer lugar al botón de borrado en móvil */
+            .pos-table th:last-child, 
+            .pos-table td:last-child {
+                padding-right: 8px !important;
+            }
+
+            /* SECCIÓN DE PAGO (ABAJOS) */
+            .checkout-section {
+                padding-top: 12px !important;
+            }
+
+            /* Los 4 botones de pago: en celular pasan a ser de 2 en 2 en vez de 4 en línea */
+            .payment-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 8px !important;
+            }
+            
+            .btn-pay-method {
+                height: 55px !important; /* Más bajos para que no ocupen media pantalla */
+                font-size: 12px !important;
+                gap: 2px !important;
+            }
+            
+            .btn-pay-method .material-icons-outlined {
+                font-size: 20px !important;
+            }
+
+            /* Caja Verde del Total: toma el 100% del ancho abajo de los métodos de pago */
+            .total-box {
+                height: 60px !important;
+                padding: 10px 16px !important;
+                align-items: center !important; /* Centrado en celular queda más corporativo */
+                flex-direction: row !important; /* Etiqueta y Monto en la misma línea */
+                justify-content: space-between !important;
+                box-shadow: 0 2px 8px rgba(16,124,65,0.2) !important;
+            }
+            
+            .total-amount {
+                font-size: 22px !important;
+            }
+        }
+
+        .nav-group { display: flex; flex-direction: column; gap: 4px; }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 24px;
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 14px;
+            gap: 12px;
+            cursor: pointer;
+            opacity: 0.85;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background-color: var(--bg-main);
+            font-weight: 600;
+            color: var(--text-main);
+            opacity: 1;
+        }
+
+        .nav-item.active {
+            border-left: 4px solid #0078d4;
+            padding-left: 20px;
+        }
+
+        /* --- ÁREA DE CONTENIDO TERMINAL --- */
+        .content-area {
+            flex: 1;
+            height: 100%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* El contenedor principal mantiene el control rígido */
+            background-color: var(--bg-main);
+        }
+
+        .breadcrumb-text { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+        
+        .pos-card {
+            background: var(--bg-card);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: var(--shadow-card);
+            border: 1px solid var(--border-color);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden; /* Fuerza a sus hijos directos a respetar los límites flex */
+        }
+
+        /* Buscador Superior */
+        .search-block { max-width: 700px; margin: 0 auto 15px auto; width: 100%; }
+        
+        .search-input-group .form-control {
+            background-color: var(--bg-input);
+            border-color: var(--border-input);
+            color: var(--text-main);
+            padding-left: 15px;
+        }
+        .search-input-group .form-control:focus {
+            background-color: var(--bg-input);
+            color: var(--text-main);
+            border-color: #0078d4;
+            box-shadow: none;
+        }
+        .search-input-group .input-group-text {
+            background-color: var(--bg-input);
+            border-color: var(--border-input);
+            color: var(--text-muted);
+        }
+
+        .btn-microsoft-accent {
+            background-color: var(--bg-btn-accent);
+            border: 1px solid var(--border-input);
+            color: var(--text-btn-accent);
+        }
+        .btn-microsoft-accent:hover {
+            background-color: var(--bg-btn-accent-hover);
+            border-color: var(--border-input);
+            color: var(--text-btn-accent);
+        }
+
+        /* Tira informativa de la venta */
+        .meta-info-strip {
+            background-color: var(--bg-strip);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px 16px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        .meta-info-strip strong { color: var(--text-main); }
+
+        /* --- TABLA DE PRODUCTOS --- */
+        .table-responsive-container {
+            flex: 1; /* Ocupa dinámicamente todo el espacio que sobre en el eje vertical */
+            overflow-y: auto !important; /* Forza la aparición de la barra de desplazamiento interna */
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--bg-card);
+            
+            /* Configuración para scroll suave y estético */
+            scrollbar-width: thin; 
+            scrollbar-color: var(--border-input) transparent;
+        }
+
+        .pos-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        
+        .pos-table th {
+            background-color: var(--bg-table-header);
+            color: var(--text-muted);
+            font-weight: 600;
+            padding: 12px 16px;
+            border-bottom: 2px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .pos-table tbody tr {
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+        }
+        .pos-table tbody tr:hover { background-color: var(--bg-table-header); }
+        .pos-table td { padding: 14px 16px; color: var(--text-main); vertical-align: middle; }
+
+        /* Botón de borrado interactivo a la derecha */
+        .delete-overlay {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+        .pos-table tbody tr:hover .delete-overlay { opacity: 0.7; pointer-events: auto; }
+        .pos-table tbody tr:hover .delete-overlay:hover { opacity: 1; }
+        
+        .btn-delete-row {
+            background-color: var(--bg-btn-delete);
+            color: var(--text-btn-delete);
+            border: 1px solid var(--border-btn-delete);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            cursor: pointer;
+        }
+
+        /* --- SECCIÓN INFERIOR: BOTONES Y TOTAL --- */
+        .checkout-section { border-top: 1px solid var(--border-color); padding-top: 20px; }
+        .payment-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        
+        .btn-pay-method {
+            background-color: var(--bg-btn-pay);
+            border: 1px solid var(--border-input);
+            border-radius: 6px;
+            height: 75px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            color: var(--text-main);
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .btn-pay-method:hover {
+            background-color: var(--bg-btn-pay-hover);
+            border-color: #0078d4;
+            color: #0078d4;
+        }
+        .btn-pay-method .material-icons-outlined { color: var(--text-muted); }
+        .btn-pay-method:hover .material-icons-outlined { color: #0078d4; }
+
+        /* Caja Verde Administrativa Inalterada */
+        .total-box {
+            background-color: #107c41;
+            color: #ffffff;
+            border-radius: 6px;
+            padding: 16px 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-end;
+            height: 75px;
+            box-shadow: 0 4px 12px rgba(16,124,65,0.3);
+        }
+        .total-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.9; }
+        .total-amount { font-size: 28px; font-weight: 700; line-height: 1; }
+    </style>
+</head>
+<body>
+
+    <!-- BARRA SUPERIOR -->
+    <header class="top-bar">
+        <div class="top-bar-left">
+            <button class="theme-toggle-btn" id="sidebarToggle" title="Menú principal">
+                <span class="material-icons-outlined">apps</span>
+            </button>
+            <div class="brand">Contoso <span style="font-weight:300;">| POS Terminal</span></div>
+        </div>
+        <div class="top-bar-right">
+            <!-- Botón del Conmutador de Tema (Modo Claro/Oscuro) -->
+            <button class="theme-toggle-btn" id="themeToggle" title="Cambiar a Modo Oscuro">
+                <span class="material-icons-outlined" id="themeIcon">dark_mode</span>
+            </button>
+            <span class="material-icons-outlined" style="cursor: pointer;">settings</span>
+            <div class="user-profile">
+                <span th:text="${username} != null ? ${username} + ' (Caja 01)' : 'Usuario (Caja 01)'"></span>
+                <div class="avatar">AR</div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- MENÚ LATERAL -->
+        <nav class="sidebar">
+            <div class="nav-group">
+                <a href="#" class="nav-item"><span class="material-icons-outlined">home</span>Inicio</a>
+                <a href="#" class="nav-item active"><span class="material-icons-outlined">point_of_sale</span>Ventas</a>
+                <a href="#" class="nav-item"><span class="material-icons-outlined">inventory_2</span>Inventario</a>
+                <a href="#" class="nav-item"><span class="material-icons-outlined">people</span>Clientes</a>
+                <a href="#" class="nav-item"><span class="material-icons-outlined">bar_chart</span>Reportes</a>
+                <a href="#" class="nav-item"><span class="material-icons-outlined">badge</span>Personal</a>
+            </div>
+            <div class="nav-group">
+                <a href="#" class="nav-item"><span class="material-icons-outlined">settings</span>Configuración</a>
+                <a href="#" class="nav-item"><span class="material-icons-outlined">help</span>Ayuda</a>
+            </div>
+        </nav>
+
+        <!-- ÁREA DE CONTENIDO TERMINAL (EL CENTRO DINÁMICO) -->
+        <main class="content-area">
+            <!-- Thymeleaf reemplazará este div con el fragmento específico de la pestaña -->
+            <div th:replace="${content}"></div>
+        </main>
+    </div>
+
+    <!-- SCRIPT DE LOGICA INTERACTIVA DE ENTORNO -->
+    <script>
+        const toggleBtn = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const breadcrumb = document.getElementById('breadcrumb');
+
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.querySelector('.sidebar');
+
+        // Lógica para abrir/cerrar el menú en móviles
+        sidebarToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            sidebar.classList.toggle('show');
+        });
+
+        // Si el usuario hace clic en el centro de la pantalla, el menú se cierra solo
+        document.querySelector('.content-area').addEventListener('click', () => {
+                sidebar.classList.remove('show');
+        });
+
+        toggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-theme');
+            
+            if(document.body.classList.contains('dark-theme')) {
+                themeIcon.textContent = 'light_mode';
+                if(breadcrumb) breadcrumb.textContent = 'Terminal > Nueva Venta (Modo Oscuro)';
+                toggleBtn.title = "Cambiar a Modo Claro";
+            } else {
+                themeIcon.textContent = 'dark_mode';
+                if(breadcrumb) breadcrumb.textContent = 'Terminal > Nueva Venta';
+                toggleBtn.title = "Cambiar a Modo Oscuro";
+            }
+        });
+    </script>
+</body>
+</html>

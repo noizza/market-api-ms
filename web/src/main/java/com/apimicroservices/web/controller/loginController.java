@@ -7,9 +7,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import com.apimicroservices.web.model.loginForm;
 import com.apimicroservices.web.service.loginService;
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.interfaces.DecodedJWT;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 
@@ -19,18 +18,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class loginController {
     private final loginService service;
-
-    @GetMapping("/")
-    public String index(HttpSession session, Model model) {
-        String token = (String) session.getAttribute("token");
-        if (token == null) return "redirect:/login";
-        DecodedJWT decodedJWT = JWT.decode(token);
-        model.addAttribute("username", decodedJWT.getSubject());
-        return "index";
-    }
     
     @GetMapping("/login")
-    public String login(Model model) {
+    public String login(Model model, HttpSession session, HttpServletResponse response) {
+        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        response.setHeader("Pragma", "no-cache");
+        response.setDateHeader("Expires", 0);
+        if (session.getAttribute("token") != null) return "redirect:/";
         model.addAttribute("loginForm", new loginForm());
         model.addAttribute("error", null);
         return "login";

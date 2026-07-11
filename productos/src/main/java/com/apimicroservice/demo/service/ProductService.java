@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.apimicroservice.demo.dto.ProductDTO;
+import com.apimicroservice.demo.dto.prProductDTO;
 import com.apimicroservice.demo.exception.ResourceNotFoundException;
 import com.apimicroservice.demo.repository.ProductMapper;
 import com.apimicroservice.demo.repository.ProductRepository;
@@ -52,8 +53,8 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public List<ProductDTO> searchProductsByNameDTO(String name) {
-        return mapper.toDTOList(repository.findByNameContainingIgnoreCase(name));
+    public List<prProductDTO> searchProductsByNameDTO(String name) {
+        return mapper.toPrDTOList(repository.findByNameContainingIgnoreCase(name));
     }
 
     @Transactional
@@ -84,4 +85,8 @@ public class ProductService {
     var products = repository.findByBarcodeIn(barcodes); 
     return mapper.toDTOList(products);
 }
+
+    public List<ProductDTO> searchProductsContainsNameDTO(String text) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

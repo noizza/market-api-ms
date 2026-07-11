@@ -51,5 +51,4 @@ public record ProductDTO(
     boolean promoted
     
 ) {
-    //TODO: Agregar los otros DTOS que me faltaron.
 }

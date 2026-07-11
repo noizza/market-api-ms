@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.apimicroservice.demo.dto.ProductDTO;
+import com.apimicroservice.demo.dto.prProductDTO;
 import com.apimicroservice.demo.service.ProductService;
 
 import jakarta.validation.Valid;
@@ -55,7 +56,7 @@ public class ProductController {
     }
 
     @GetMapping("/search")
-    public List<ProductDTO> searchProducts(@RequestParam String name) {
+    public List<prProductDTO> searchProducts(@RequestParam String name) {
         return service.searchProductsByNameDTO(name);
     }
 
